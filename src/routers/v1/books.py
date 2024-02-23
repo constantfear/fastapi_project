@@ -25,6 +25,7 @@ async def create_book(
         title=book.title,
         author=book.author,
         year=book.year,
+        seller_id=book.seller_id,
         count_pages=book.count_pages,
     )
     session.add(new_book)
@@ -47,8 +48,10 @@ async def get_all_books(session: DBSession):
 # Ручка для получения книги по ее ИД
 @books_router.get("/{book_id}", response_model=ReturnedBook)
 async def get_book(book_id: int, session: DBSession):
-    res = await session.get(Book, book_id)
-    return res
+    if single_book := await session.get(Book, book_id):
+        return single_book
+
+    return Response(status_code=status.HTTP_404_NOT_FOUND)
 
 
 # Ручка для удаления книги
