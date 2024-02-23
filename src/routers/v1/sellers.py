@@ -1,6 +1,7 @@
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, Response, status
+
 # from icecream import ic
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -8,7 +9,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.configurations.database import get_async_session
 from src.models.books import Book
 from src.models.seller import Seller
-
 from src.schemas import IncomingSeller, ReturnedAllSellers, ReturnedSeller, ReturnedSellerWithBooks
 
 seller_router = APIRouter(tags=["seller"], prefix="/seller")
@@ -16,10 +16,10 @@ seller_router = APIRouter(tags=["seller"], prefix="/seller")
 DBSession = Annotated[AsyncSession, Depends(get_async_session)]
 
 
-@seller_router.post("/", response_model=ReturnedSeller, status_code=status.HTTP_201_CREATED)  # Прописываем модель ответа
-async def create_seller(
-    seller: IncomingSeller, session: DBSession
-):
+@seller_router.post(
+    "/", response_model=ReturnedSeller, status_code=status.HTTP_201_CREATED
+)  # Прописываем модель ответа
+async def create_seller(seller: IncomingSeller, session: DBSession):
     new_seller = Seller(
         first_name=seller.first_name,
         last_name=seller.last_name,
@@ -54,9 +54,9 @@ async def get_seller(seller_id: int, session: DBSession):
             "first_name": single_seller.first_name,
             "last_name": single_seller.last_name,
             "email": single_seller.email,
-            "books": books
+            "books": books,
         }
-        
+
         return seller_data
 
     return Response(status_code=status.HTTP_404_NOT_FOUND)
@@ -74,7 +74,11 @@ async def delete_book(seller_id: int, session: DBSession):
 
 # Ручка для обновления данных о книге
 @seller_router.put("/{seller_id}", response_model=ReturnedSeller)
-async def update_book(seller_id: int, new_data: ReturnedSeller, session: DBSession, ):
+async def update_book(
+    seller_id: int,
+    new_data: ReturnedSeller,
+    session: DBSession,
+):
     # Оператор "морж", позволяющий одновременно и присвоить значение и проверить его.
     if updated_seller := await session.get(Seller, seller_id):
         updated_seller.first_name = new_data.first_name

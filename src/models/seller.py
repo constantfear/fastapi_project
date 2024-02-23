@@ -1,7 +1,6 @@
 from sqlalchemy import String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-
 from .base import BaseModel
 
 
@@ -14,4 +13,3 @@ class Seller(BaseModel):
     email: Mapped[str] = mapped_column(String(100), nullable=False)
     password: Mapped[str] = mapped_column(String(100), nullable=False)
     books = relationship("Book", cascade="all,delete", backref="seller")
-

@@ -18,7 +18,7 @@ class IncomingSeller(BaseSeller):
     @field_validator("email")  # Валидатор, проверяет что дата не слишком древняя
     @staticmethod
     def validate_email(val: int):
-        if '@' not in val:
+        if "@" not in val:
             raise PydanticCustomError("Validation error", "Email is wrong!")
         return val
 

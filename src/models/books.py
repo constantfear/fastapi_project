@@ -1,6 +1,6 @@
-from sqlalchemy import String
+from sqlalchemy import ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column
-from sqlalchemy import ForeignKey
+
 from .base import BaseModel
 
 
