@@ -4,6 +4,9 @@ from sqlalchemy import select
 
 from src.models import books, seller
 
+# from icecream import ic
+
+
 # result = {
 #     "books": [
 #         {"author": "fdhgdh", "title": "jdhdj", "year": 1997},
@@ -18,9 +21,11 @@ async def test_create_book(db_session, async_client):
     seller_1 = seller.Seller(first_name="Ivan", last_name="Ivanov", email="qwe@mail.com", password="password1")
     db_session.add(seller_1)
     await db_session.flush()
-
+    response = await async_client.post("/api/v1/token/", json={"email": "qwe@mail.com", "password": "password1"})
+    token_response = response.json()
+    headers = {"Authorization": "Bearer " + token_response["access_token"]}
     data = {"title": "Wrong Code", "author": "Robert Martin", "pages": 104, "year": 2007, "seller_id": seller_1.id}
-    response = await async_client.post("/api/v1/books/", json=data)
+    response = await async_client.post("/api/v1/books/", headers=headers, json=data)
 
     assert response.status_code == status.HTTP_201_CREATED
 
@@ -139,13 +144,19 @@ async def test_update_book(db_session, async_client):
     seller_1 = seller.Seller(first_name="Ivan", last_name="Ivanov", email="qwe@mail.com", password="password1")
     db_session.add(seller_1)
     await db_session.flush()
+
     book = books.Book(author="Pushkin", title="Eugeny Onegin", year=2001, count_pages=104, seller_id=seller_1.id)
 
     db_session.add(book)
     await db_session.flush()
 
+    response = await async_client.post("/api/v1/token/", json={"email": "qwe@mail.com", "password": "password1"})
+    token_response = response.json()
+    headers = {"Authorization": "Bearer " + token_response["access_token"]}
+
     response = await async_client.put(
         f"/api/v1/books/{book.id}",
+        headers=headers,
         json={
             "title": "Mziri",
             "author": "Lermontov",
