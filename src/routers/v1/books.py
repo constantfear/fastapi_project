@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.configurations.database import get_async_session
 from src.models.books import Book
+from src.models.seller import Seller
 from src.schemas import IncomingBook, ReturnedAllBooks, ReturnedBook
 
 books_router = APIRouter(tags=["books"], prefix="/books")
@@ -21,17 +22,22 @@ async def create_book(
     book: IncomingBook, session: DBSession
 ):  # прописываем модель валидирующую входные данные и сессию как зависимость.
     # это - бизнес логика. Обрабатываем данные, сохраняем, преобразуем и т.д.
-    new_book = Book(
-        title=book.title,
-        author=book.author,
-        year=book.year,
-        seller_id=book.seller_id,
-        count_pages=book.count_pages,
-    )
-    session.add(new_book)
-    await session.flush()
+    seller = await session.get(Seller, book.seller_id)
 
-    return new_book
+    if seller:
+        new_book = Book(
+            title=book.title,
+            author=book.author,
+            year=book.year,
+            seller_id=book.seller_id,
+            count_pages=book.count_pages,
+        )
+        session.add(new_book)
+        await session.flush()
+
+        return new_book
+
+    return Response(status_code=status.HTTP_404_NOT_FOUND)
 
 
 # Ручка, возвращающая все книги

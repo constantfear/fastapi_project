@@ -1,5 +1,6 @@
 from pydantic import BaseModel, field_validator
 from pydantic_core import PydanticCustomError
+from validate_email_address import validate_email
 
 from .books import ReturnedSellerBook
 
@@ -15,10 +16,10 @@ class BaseSeller(BaseModel):
 class IncomingSeller(BaseSeller):
     password: str
 
-    @field_validator("email")  # Валидатор, проверяет что дата не слишком древняя
+    @field_validator("email")  # Валидатор
     @staticmethod
     def validate_email(val: int):
-        if "@" not in val:
+        if not validate_email(val):
             raise PydanticCustomError("Validation error", "Email is wrong!")
         return val
 
