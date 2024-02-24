@@ -4,7 +4,7 @@ from validate_email_address import validate_email
 
 from .books import ReturnedSellerBook
 
-__all__ = ["IncomingSeller", "ReturnedSeller", "ReturnedAllSellers", "ReturnedSellerWithBooks"]
+__all__ = ["IncomingSeller", "ReturnedSeller", "ReturnedAllSellers", "ReturnedSellerWithBooks", "LoginSeller"]
 
 
 class BaseSeller(BaseModel):
@@ -38,3 +38,8 @@ class ReturnedSellerWithBooks(BaseModel):
 
 class ReturnedAllSellers(BaseModel):
     sellers: list[ReturnedSeller]
+
+
+class LoginSeller(BaseModel):
+    email: str
+    password: str

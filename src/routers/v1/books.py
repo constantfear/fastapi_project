@@ -7,8 +7,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.configurations.database import get_async_session
 from src.models.books import Book
-from src.models.seller import Seller
 from src.schemas import IncomingBook, ReturnedAllBooks, ReturnedBook
+
+from .authorization import get_current_user
 
 books_router = APIRouter(tags=["books"], prefix="/books")
 
@@ -19,12 +20,11 @@ DBSession = Annotated[AsyncSession, Depends(get_async_session)]
 # Ручка для создания записи о книге в БД. Возвращает созданную книгу.
 @books_router.post("/", response_model=ReturnedBook, status_code=status.HTTP_201_CREATED)  # Прописываем модель ответа
 async def create_book(
-    book: IncomingBook, session: DBSession
+    book: IncomingBook, session: DBSession, current_seller: Annotated[dict, Depends(get_current_user)]
 ):  # прописываем модель валидирующую входные данные и сессию как зависимость.
     # это - бизнес логика. Обрабатываем данные, сохраняем, преобразуем и т.д.
-    seller = await session.get(Seller, book.seller_id)
 
-    if seller:
+    if current_seller.id == book.seller_id:
         new_book = Book(
             title=book.title,
             author=book.author,
@@ -37,7 +37,7 @@ async def create_book(
 
         return new_book
 
-    return Response(status_code=status.HTTP_404_NOT_FOUND)
+    return Response(status_code=status.HTTP_400_BAD_REQUEST)
 
 
 # Ручка, возвращающая все книги
@@ -73,16 +73,19 @@ async def delete_book(book_id: int, session: DBSession):
 
 # Ручка для обновления данных о книге
 @books_router.put("/{book_id}")
-async def update_book(book_id: int, new_data: ReturnedBook, session: DBSession):
+async def update_book(
+    book_id: int, new_data: ReturnedBook, session: DBSession, current_seller: Annotated[dict, Depends(get_current_user)]
+):
     # Оператор "морж", позволяющий одновременно и присвоить значение и проверить его.
     if updated_book := await session.get(Book, book_id):
-        updated_book.author = new_data.author
-        updated_book.title = new_data.title
-        updated_book.year = new_data.year
-        updated_book.count_pages = new_data.count_pages
+        if updated_book.seller_id == current_seller.id:
+            updated_book.author = new_data.author
+            updated_book.title = new_data.title
+            updated_book.year = new_data.year
+            updated_book.count_pages = new_data.count_pages
 
-        await session.flush()
+            await session.flush()
 
-        return updated_book
+            return updated_book
 
-    return Response(status_code=status.HTTP_404_NOT_FOUND)
+    return Response(status_code=status.HTTP_400_BAD_REQUEST)

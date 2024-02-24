@@ -44,9 +44,9 @@ async def test_get_sellers(db_session, async_client):
     }
 
 
-# Тест на ручку получения одной книги
+# Тест на ручку получения одного продавца
 @pytest.mark.asyncio
-async def test_get_single_(db_session, async_client):
+async def test_get_single_seller(db_session, async_client):
 
     seller_1 = seller.Seller(first_name="Ivan", last_name="Ivanov", email="qwe@mail.com", password="password1")
     seller_2 = seller.Seller(first_name="Petr", last_name="Petrov", email="zxc@mail.com", password="password2")
@@ -58,7 +58,11 @@ async def test_get_single_(db_session, async_client):
     db_session.add_all([book])
     await db_session.flush()
 
-    response = await async_client.get(f"/api/v1/seller/{seller_1.id}")
+    response = await async_client.post("/api/v1/token/", json={"email": "qwe@mail.com", "password": "password1"})
+    token_response = response.json()
+    headers = {"Authorization": "Bearer " + token_response["access_token"]}
+
+    response = await async_client.get(f"/api/v1/seller/{seller_1.id}", headers=headers)
 
     assert response.status_code == status.HTTP_200_OK
 
@@ -74,7 +78,7 @@ async def test_get_single_(db_session, async_client):
 
 # Тест на ручку удаления продавца
 @pytest.mark.asyncio
-async def test_delete_book(db_session, async_client):
+async def test_delete_seller(db_session, async_client):
     # Создаем книги вручную, а не через ручку, чтобы нам не попасться на ошибку которая
     # может случиться в POST ручке
     seller_1 = seller.Seller(first_name="Ivan", last_name="Ivanov", email="qwe@mail.com", password="password1")
@@ -92,9 +96,9 @@ async def test_delete_book(db_session, async_client):
     assert len(res) == 0
 
 
-# Тест на ручку обновления книги
+# Тест на ручку обновления продавцов
 @pytest.mark.asyncio
-async def test_update_book(db_session, async_client):
+async def test_update_seller(db_session, async_client):
     seller_1 = seller.Seller(first_name="Ivan", last_name="Ivanov", email="qwe@mail.com", password="password1")
 
     db_session.add(seller_1)

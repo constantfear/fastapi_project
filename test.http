@@ -3,7 +3,7 @@
 # Найти можно по идентификатору: humao.rest-client
 # Tunder Client не позволяет свободно импортировать-экспортировать записи,
 # поэтому перешел на этот плагин. Он тоже хорош :-)
-
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzZWxsZXJfZW1haWwiOiJxZXdAcXdlIiwic2VsbGVyX2lkIjoxLCJleHAiOjE3MDg4MDM4MDd9.eRvp7g9ptR9Hs6no5XKI8Hk5-wvANNXjUxE37-5HdDI
 
 # Создаем продавца
 POST http://localhost:8000/api/v1/seller/ HTTP/1.1
@@ -19,9 +19,30 @@ content-type: application/json
 
 ###
 
+# Получаем токен продавца
+POST http://localhost:8000/api/v1/token/ HTTP/1.1
+content-type: application/json
+
+{
+    "email": "qew@qwe",
+    "password": "201307"
+}
+
+
+
+###
+
+# Получаем одного продавца по его ИД
+GET http://localhost:8000/api/v1/seller/1 HTTP/1.1
+content-type: application/json
+Authorization: Bearer {{token}}
+
+###
+
 # Создаем книгу
 POST http://localhost:8000/api/v1/books/ HTTP/1.1
 content-type: application/json
+Authorization: Bearer {{token}}
 
 {
     "title": "Wrong Code",
@@ -45,18 +66,15 @@ GET http://localhost:8000/api/v1/seller/ HTTP/1.1
 ###
 
 # Получаем одну книгу по ее ИД
-GET http://localhost:8000/api/v1/books/2 HTTP/1.1
+GET http://localhost:8000/api/v1/books/1 HTTP/1.1
 
 ###
 
-# Получаем одного продавца по его ИД
-GET http://localhost:8000/api/v1/seller/1 HTTP/1.1
-
-###
 
 # Обновляем поля в данных о книге
 PUT http://localhost:8000/api/v1/books/1 HTTP/1.1
 content-type: application/json
+Authorization: Bearer {{token}}
 
 {
     "title": "Clean Code",
@@ -91,5 +109,16 @@ content-type: application/json
 # Удаляем продавца
 DELETE http://localhost:8000/api/v1/seller/1 HTTP/1.1
 content-type: application/json
+
+###
+
+# Удаляем продавца
+POST http://localhost:8000/api/v1/token/ HTTP/1.1
+content-type: application/json
+
+{
+    "email": "qew@qwe",
+    "password": "201307"
+}
 
 ###
