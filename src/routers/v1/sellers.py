@@ -11,6 +11,8 @@ from src.models.books import Book
 from src.models.seller import Seller
 from src.schemas import IncomingSeller, ReturnedAllSellers, ReturnedSeller, ReturnedSellerWithBooks
 
+from .authorization import get_current_user
+
 seller_router = APIRouter(tags=["seller"], prefix="/seller")
 
 DBSession = Annotated[AsyncSession, Depends(get_async_session)]
@@ -43,7 +45,7 @@ async def get_all_sellers(session: DBSession):
 
 # Ручка для получения продавца по его ИД
 @seller_router.get("/{seller_id}", response_model=ReturnedSellerWithBooks)
-async def get_seller(seller_id: int, session: DBSession):
+async def get_seller(seller_id: int, session: DBSession, current_seller: Annotated[dict, Depends(get_current_user)]):
     if single_seller := await session.get(Seller, seller_id):
         query = select(Book).filter(Book.seller_id == seller_id)
         res = await session.execute(query)
@@ -64,7 +66,7 @@ async def get_seller(seller_id: int, session: DBSession):
 
 # Ручка для удаления продавца
 @seller_router.delete("/{seller_id}")
-async def delete_book(seller_id: int, session: DBSession):
+async def delete_seller(seller_id: int, session: DBSession):
     deleted_seller = await session.get(Seller, seller_id)
     if deleted_seller:
         await session.delete(deleted_seller)
@@ -72,9 +74,9 @@ async def delete_book(seller_id: int, session: DBSession):
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
-# Ручка для обновления данных о книге
+# Ручка для обновления данных о продавце
 @seller_router.put("/{seller_id}", response_model=ReturnedSeller)
-async def update_book(
+async def update_seller(
     seller_id: int,
     new_data: ReturnedSeller,
     session: DBSession,
