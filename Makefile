@@ -32,3 +32,6 @@ up_compose:
 	docker-compose -f docker-compose.yml up -d
 down_compose:
 	docker-compose -f docker-compose.yml down
+
+run_app:
+	uvicorn src.main:app --reload
